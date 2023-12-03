@@ -1,0 +1,90 @@
+##Melakukan query prometheus
+Data dari sebuah metrics akan disimpan ke dalam TSDB (Time Series Database).
+Kita dapat mengakses data tersebut dengan menggunakan PromQL (Prometheus Query Language).
+Untuk melakukan query, kita dapat menggunakan Prometheus UI di menu Graph.
+
+Setiap menuliskan query PromQL, return data yang dikembalikan akan berkaitan dengan salah satu tipe data dibawah ini:
+1. Instant Vector
+   Merupakan sekumpulan data time series yang memiliki value pada titik tertentu.
+   Data yang dikembalikan bertipe scalar, yang artinya data tersebut nilainya konstan dan tidak akan berubah.
+   
+   *https://prometheus.io/docs/prometheus/latest/querying/basics/
+   
+   Contoh query:
+   - Simple selection
+     node_network_receive_bytes_total
+     
+     node_network_receive_bytes_total{device="ens5",instance="localhost:9100",job="server-linux}			577455502
+     node_network_receive_bytes_total{device="lo",instance="localhost:9100",job="server-linux}				635968031
+
+   - Simple selection filter label
+     node_network_receive_bytes_total{device="ens5"}
+     
+     node_network_receive_bytes_total{device="ens5",instance="localhost:9100",job="server-linux}			577455502
+
+   - Label regular expression
+     node_network_receive_bytes_total{device=~"ens.*"}
+     
+     node_network_receive_bytes_total{device="ens5",instance="localhost:9100",job="server-linux}			577455502
+     
+     *=  : memilih label yang memiliki nilai sama persis yang ditentukan
+      != : memiliki label selain yang ditentukan
+      =~ : memilih label sesuai dengan regex-match yang ditentukan
+      != : memilih label selain yang ditentukan regex-match
+
+2. Range Vector
+   Merupakan sekumpulan data time series yang memiliki value pada rentang waktu tertentu. 
+
+   Contoh query:
+   - Range vector
+     node_network_receive_bytes_total{device="ens5"}[30s]
+     
+     node_network_receive_bytes_total{device="ens5",instance="localhost:9100",job="server-linux}			581661005 @1690860808.467
+														                                                	581661473 @1690860813.467
+													                                                		581662113 @1690860818.467
+														                                                	581664915 @1690860823.467
+														                                                	581665479 @1690860828.467
+															                                                581666840 @1690860833.467
+    *contoh mengambil data 30 detik ke belakang dari waktu sekarang
+     hasilnya menjadi 6 value karena 30s/5s sesuai dengan nilai interval scope yang dimasukan di file konfigurasi prometheus
+
+    *581661005        = value 
+     @1690860808.467  = unix timestamp (convert ke calculator timestamp seperti di web https://www.epochconverter.com/)
+
+   - Range vector graph & function (menampilkan graph)
+     rate(node_network_receive_bytes_total{device="ens5"}[30s])
+     
+     node_network_receive_bytes_total{device="ens5",instance="localhost:9100",job="server-linux}			581661005 @1690860808.467
+
+     *https://prometheus.io/docs/prometheus/latest/querying/functions/
+
+3. Scalar
+4. String 
+   saat ini belum digunakan, masih tahap development.
+
+
+##Promotheus query operator
+PromoQL mendukung beberapa operasi operator, diantara sebagai berikut:
+1. Arithmetic binary operator
+  - + = penambahan
+  - - = pengurangan
+  - * = perkalian
+  - / = pembagian
+  - % = modulo
+  - ^ = exponensial
+
+   Contoh query:
+   - node_filesystem_size_bytes{instance="54.255.135.179:9100",device!~'rootfs'} - node_filesystem_avail_bytes{instance="54.255.135.179:9100",device!~'rootfs'}
+     
+     *query untuk mencari tahu penggunaan disk di server linux kita
+
+2. Aggregation
+   Digunakan untuk mengagregasi beberapa time-series data kedalam suatu nilai.
+   Ada dua style yang dapat digunakan:
+   - <aggr-op> [without|by (<label list>)] ([parameter,] <vector expression>)
+   - <aggr-op>([parameter,] <vector expression>) [without|by (<label list>)]
+
+   Contoh query:
+   - sum(rate(node_cpu_seconds_total{mode="user"}[1ml] by (instance) * 100
+     
+     *menghitung persentase penggunaan cpu

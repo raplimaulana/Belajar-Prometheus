@@ -1,0 +1,46 @@
+##Instalasi prometheus
+Prometheus beserta componen lainnya dibuat menggunakan bahasa pemrograman GO, yang berarti kita bisa dengan mudah mendeploynya karena dalam bentuk single binary file.
+
+#Download Prometheus
+wget https://github.com/prometheus/prometheus/releases/download/v2.48.0/prometheus-2.48.0.linux-amd64.tar.gz
+tar -xvf prometheus-2.48.0.linux-amd64.tar.gz
+cd prometheus-2.48.0.linux-amd64
+
+##Menambahkan prometheus ke dalam systemd linux
+
+#Membuat user dan grup prometheus
+sudo groupadd --system prometheus
+sudo useradd --system -s /sbin/nologin -g prometheus prometheus
+
+#memindahkan binary file prometheus 
+sudo mv prometheus promtool /usr/local/bin
+prometheus --version
+
+#membuat direktori baru untuk menyimpan file konfigurasi dan data prometheus
+sudo mkdir /etc/prometheus 					                    #untuk menyimpan file konfigurasi
+sudo mkdir /var/lib/prometheus					                #untuk menyimpan data
+sudo chown -R prometheus:prometheus /var/lib/prometheus
+sudo mv console_libraries consoles prometheus.yml /etc/prometheus
+
+#Membuat file prometheus.service
+vim /etc/systemd/system/prometheus.service
+sudo systemctl daemon-reload
+
+#Membuat konfigurasi dasar prometheus
+Konfigurasi prometheus dituliskan dalam bentuk YAML file.
+Setiap resource atau sistem yang akan kita ambil metricnya disebut instance.
+Kumpulan dari instance memiliki tugas yang sama disebut sebagai job. 
+
+vim prometheus.yaml
+
+##Menjalankan prometheus
+./prometheus atau
+systemctl start prometheus
+systemctl enable prometheus
+
+##Mengakses prometheus
+Secara default prometheus berjalan di port 9090, yang dimana port tempat web UI % API dari prometheus di exspose.
+Check dengan perintah "sudo lsof -n -i | grep prometheus".
+
+curl localhost:9090                #dashboard prometheus
+curl localhost:9090/metrics        #metrics prometheus

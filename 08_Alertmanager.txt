@@ -1,0 +1,97 @@
+##Alertmanager
+Prometheus memiliki kemampuan untuk mengirimkan notifikasi berdasarkan kondisi yang kita tentukan dengan cara mengintegerasikannya dengan Alertmanager.
+Contohnya ketika suatu sistem CPU nya sudah menyentuh 70% maka akan mengirimkan notifikasi ke telegram, email ataupun slack.
+
+##Instalasi Alertmanager
+wget
+
+##Menu alert di grafana
+Menu alert dapat dilihat di Grafana > Home > Alert 
+1. Alert rules
+   Berisi list rule alert yang akan akan digunakan.
+
+2. Contact points
+   Berisi list channel kemana notifikasi akan dikirimkan.
+
+3. Notification policies
+
+4. Silences
+   Berisi list alert yang dinonaktifkan.
+
+##Membuat Alertmanager untuk notifikasi via telegram
+#Konfigurasi Alertmanager
+vim alermanager.yml
+
+#membuat bot telegram
+1. Cara pertama menggunakan file alertmanager.yaml
+   - Search BotFather
+   - Create bot
+   - Copy bot token ke konfigurasi file Alertmanager
+   - Buat group telegram
+   - Masukan bot tadi sebagai anggota grup
+   - Masukan GetIDs Bot untuk mendapatkan chat_id dari grup yang telah dibuat (nilainya selalu negatif)
+   - Konfigurasi prometheus rule
+     vim rule-cpu-50-percent.yml
+   - Jalankan Alertmanager
+     ./alermanager
+   - Restart prometheus
+   - Alertmanager akan berjalan di port 9093
+   - Sebuah rule statusnya akan "PENDING" jika sesuai dengan kondisi yang ditentukan dan akan menjadi "FIRING" jika selama waktu yang ditentukan di for: element terpenuhi
+     Pada saat "FIRING" inilah prometheus akan mengirimkan alert ke Alertmanager untuk dibuatkan notifikasi
+
+2. Cara kedua menggunakan dashboard grafana
+   - Search BotFather
+   - Create bot
+   - Copy bot token ke konfigurasi file Alertmanager
+   - Buat group telegram
+   - Masukan bot tadi sebagai anggota grup
+   - Masukan GetIDs Bot untuk mendapatkan chat_id dari grup yang telah dibuat (nilainya selalu negatif)
+   - Menambahkan Contact points telegram di Grafana > Home > Alert > Contact points
+   - Menambahkan Network policies di Grafana > Home > Alert > Network policies
+   - Menambahkan Alert apa saja yang ingin dikirimkan di Grafana > Home > Alert > Alert rules
+     - Query
+       ((sum by(instance) (irate(node_cpu_seconds_total{mode!="idle"}[15s])) / sum by (instance)((irate(node_cpu_seconds_total{}[15s])))) * 100) >= 50
+     - Expression
+       - Reduce (B)
+         Input = A
+         Function = Last
+         Mode = Strict
+       - Threshold (C)                #yang akan dikirimkan ke telegram
+         Input = B
+         IS ABOVE = 75 (jika diatas 75% maka grafana akan mengirim notifikasi alert ke telegram)
+  
+       *selain Thresold, bisa juga menggunakan match
+
+       - Math (C)
+         $B >= 50
+     - Add annotations
+      Penggunaan CPU di {{$labels.node}} sudah mencapai {{$values.B.Value}}%
+      Penggunaan CPU di {{$labels.node}} sudah mencapai {{printf "%.2f" $values.B.Value}}%		    #outputnya diambil 2 angka terakhir dibelakang koma
+   - Merapihkan template yang dikirim ke telegram di Grafana > Home > Alert > Contact points > Notification templates
+     {{define "mymessage"}}
+
+     {{if gt (len .Alerts.Firing) 0}}
+     {{len .Alerts.Firing}} firing:
+     {{range .Alert.Firing}} {{template "myalert" .}} {{end}}
+     {{end}}
+
+     {{if gt (len .Alerts.Resolved) 0}}
+     {{len .Alerts.Resolved}} resolved:
+     {{range .Alerts.Resolved}} {{template "myalert" .}} {{end}}
+     {{end}}
+     {{end}}
+
+     {{define "myalert"}}
+     Labels: {{range .Labels.SortedPairs}}
+     - {{.Name}}: {{.Value}} {{end}}
+
+     Annotation: {{if gt (len .Annotations) 0 }} {{range .Annotations.SortedPairs}}
+     - {{.Name}}: {{.Value}} {{end}}
+     {{end}}
+
+     {{if gt (len .DashboardURL) 0 }} Go to dashboard: {{.DashboardURL}}
+     {{end}} {{end}}
+  - Edit Contact points telegram yang sebelumnya ditambahkan di Grafana > Home > Alert > Contact points
+  - Di bagian "Optional Telegram setting", tambahkan template yang sudah ditambahkan
+    {{template "mymessage" .}} 
+  

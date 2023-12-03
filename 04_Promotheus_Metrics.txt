@@ -1,0 +1,72 @@
+##Prometheus metric
+Data Metric yang kita dapatkan dari node exporter sebelumnya berupa human-readable text based, yang ertinya data tersebut dapat dengan mudah kita pahami.
+Salah satu metric yang kita dapatkan saat menjalankan node exporter adalah "node_cpu_seconds_total".
+
+Pada data setiap metric selalu ada comment "# HELP" dan "# TYPE". 
+Hal itu disebut sebagai metadata annotations yang berisi informasi dari setiap metric.
+"# Help" berisi deskripsi dari suatu metric, sedangkan "# TYPE" berisi tipe dari metric tersebut.
+
+##Contoh output node exporter
+# HELP node_cpu_seconds_total Seconds the CPUs spent in each mode.
+# TYPE node_cpu_seconds_total counter
+node_cpu_seconds_total{cpu="0",mode"idle"} 168730.18
+node_cpu_seconds_total{cpu="0",mode"iowait"} 50.75
+node_cpu_seconds_total{cpu="0",mode"irq"} 0
+node_cpu_seconds_total{cpu="0",mode"nice"} 101.03
+node_cpu_seconds_total{cpu="0",mode"idle"} 5.28
+
+*node_cpu_seconds_total = metric name
+ {cpu="0",mode"idle"}   = metric label (key-pairs value)
+ 168730.18              = metric value
+
+##Promtheus metric type
+Promtheus metric type
+1. Counter
+   Merupakan tipe metrics kumulatif yang nilainya selalu bertambah atau di reset ke nol saat dijalankan.
+   Jika kita melakukan query metrics ini, maka hasil graphnya akan selalu naik atau reset ke 0.
+   Memvisualisasikan metrics yang nilainya selalu naik turun itu tidak terlalu membantu. 
+   Umumnya metrics counter akan lebih berguna jika dikombinasikan dengan rate() atau irate().
+   
+   Contoh query:
+   - node_network_receive_byte_total
+     
+     *menghitung total download network traffic
+
+2. Gauge
+   Merupakan tipe metrics yang nilainya dapat naik atau turun.
+   
+   Contoh query:
+   - node_memory_MemFree_bytes
+     *menghitung jumlah memory yang tersisa (diluar cace & buffer)
+
+3. Histogram
+   Merupakan tipe metrics yang digunakan untuk melakukan tracking distribusi dari sekumpulan angka. 
+   Biasanya sering digunakan untuk durasi request, ukuran request dan latency.
+   Histogram akan mengelompokan value dalam sebuah bucket (le = less than or equal / kurang dari sama dengan) secara kumulatif.
+
+   Contoh query
+   - prometheus_http_request_duration_seconds_bucket
+   - histogram_quantile(.95,sum(rate(prometheus_http_request_duration_seconds_bucket{handler="/metrics"}[10m])) by (le))
+
+     Result series:1
+     0.0950             
+     
+     *hasilnya adalah 0.0950 dalam satuan quantile, artinya 95% request di /metrics dalam 10 menit terakhir selesai diproses dalam 0.095 detik atau ebih cepat dari itu
+     *Percentile = representasi persentase antara 0 dan 100 (95%)
+      quantile   = representasi nilai antara 0 dan 1 (0.95)
+
+4. Summary
+   Metric summary sebenarnya sama seperti metric histogram. Perbedaannya adalah data yang dikeluarkan oleh histogram merupakan raw data yang belum berbentuk quantile, sedangkan summary sudah berbentuk quantile.
+   
+   contoh query: 
+   - go_gc_duration_seconds
+
+     # HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
+     # TYPE go_gc_duration_seconds summary
+     go_gc_duration_seconds{quantile="0"} 3.1145e-05
+     go_gc_duration_seconds{quantile="0.25"} 3.9685e-05
+     go_gc_duration_seconds{quantile="0.5"} 4.5351e-05
+     go_gc_duration_seconds{quantile="0.75"} 5.5562-05
+     go_gc_duration_seconds{quantile="1"} 0.0011855
+     go_gc_duration_seconds_sum 1.332428231
+     go_gc_duration_seconds_count 18101

@@ -1,0 +1,33 @@
+##Prometheus
+Prometheus merupakan aplikasi open-source yang digunakan untuk melakukan monitoring & alerting dari suatu sistem.
+Prometheus sendiri sudah menjadi tools yang sangat populer dan menjadi standard minimal jika membangun sistem yang cukup besar.
+
+##Pengenalan metric
+Kita dapat mengetahui kondisi dari suatu sistem karena kita membaca metric yang ada. Contohnya di windows kita dapat mengetahui penggunaan cpu dan memory dengan menggunakan task manager.
+Simpelnya metric merupakan sebuah angka yang dapat membantu kita memahami sesuatu.
+Prometheus akan mengumpulkan dan menyimpan data metric dari suatu sistem sebagai time series data. Arti dari time series adalah data akan dicatat dari waktu ke waktu.
+
+##Arsitektur prometheus
+Arsitektur prometheus:
+1. Pull Metrics 
+   Prometheus merupakan pull-based monitoring, yang artinya prometheus akan melakukan scrapping data metric dari suatu sistem melalui HTTP.
+   Agar sistem dapat mengeluarkan metrics, kita dapat menggunakan Prometheus Exporter.
+   Atau jika kita ingin membuat aplikasi yang kita miliki dapat menggunakan metrics, kita dapat menggunakan Promotheus Client Libraries.
+   Secara Standard HTTP endpoint untuk mengekspos sebuah metric biasanya adalah "/metric".
+   Data dari metrics tersebut akan disimpan didalam TSDB (Time Series Database).
+
+2. Service Discovery
+   Di sistem yang modern sekarang ini jumlah sebuah resource atau sistem dapat bertambah atau berkurang secara otomatis.
+   Agar prometheus dapat melakukan scrape metric secara otomatis pada resource yang dinamis, kita dapat menggunakan service discovery.
+   Ada banyak service discovery yanf didukung oleh prometheus seperti kubernetes, docker, dns, dll.
+
+3. Prometheus Alerting
+   Prometheus memiliki komponen terpisah yang bernama Alertmanager yang dapat kita gunakan untuk mengirimkan notifikasi jika suatu kondisi terpenuhi.
+   Yang dimana kondisi tersebut berdasarkan data yang tersimpan di TDSB.
+   Misal kita ingin membuat kindisi jika cpu usage server x lebih dari 70% selama 5 menit, maka kirimkan notifikasi peringatan ke telegram.
+
+4. Data Visualization
+   Agar suatu data metric dapat kita pahami, kita perlu melakukan visualisasi data tersebut.
+   Prometheus sendiri memiliki web UI, namun kita tetap bisa menggunakan aplikasi lain untuk visualnya seperti grafana.
+   Nantinya aplikasi visualisasi tersebut akan memanggil API dari prometheus.
+

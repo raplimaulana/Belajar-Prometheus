@@ -1,0 +1,28 @@
+##Install node exporter
+Seperti yang kita bahas sebelumnya, agar sistem dapat mengeluarkan sebuah metrics, salah satu caranya adalah kita perlu menginstal Promotheus Exporter.
+Salah satu official exporter yang bisa digunakan adalah Node Exporter yang berfungsi untuk mengespos metrics sistem berbasis OS UNIX seperti linux.
+
+#Download node exporter
+wget https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+tar xvf node_exporter-1.7.0.linux-amd64.tar.gz
+cd node_exporter-1.7.0.linux-amd64
+
+#memindahkan binary file prometheus 
+sudo mv node_exporter promtool /usr/local/bin
+node_exporter --version
+
+#Membuat file node-exporter.service
+vim /etc/systemd/system/node-exporter.service
+sudo systemctl daemon-reload
+
+#Menjalankan node exporter
+./node_exporter atau
+systemctl start node_exporter
+systemctl enable node_exporter
+
+#Mengakses HTTP endpoint metrics
+Secara default node exporter berjalan otomatis di port 9100.
+Maka jika kita akses endpoint "/metrics" di port tersebut akan mengembalikan data metric yang prometheus inginkan.
+Check dengan perintah "sudo lsof -n -i | grep node_exporter".
+
+curl localhost:9100/metrics        #metrics prometheus

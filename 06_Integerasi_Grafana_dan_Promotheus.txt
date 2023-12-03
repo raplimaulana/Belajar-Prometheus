@@ -1,0 +1,26 @@
+##Integrasi grafana dan prometheus
+Umumnya ketika orang menggunakan prometheus untuk scrapping data metrics maka akan menggunakan aplikasi external untuk memvisualisasikanya.
+Aplikasi yang banyak digunakan salah satunya adalah grafana.
+
+##Instalasi grafana
+wget xxxx
+*https://grafana.com/docs/grafana/latest/setup-grafana/installation/debian/
+
+#M#enjalankan grafana
+systemctl start grafana
+systemctl enable grafana
+
+##Mengakses grafana
+Secara default grafana berjalan di port 3000 dengan username dan password admin.
+Check dengan perintah "sudo lsof -n -i | grep grafana".
+Untuk mengintegrasikan grafana dengan prometheus, akses menu Administration > Data sources > Add new data source > Pilih Prometheus > masukan URL promotheus:9090
+
+curl localhost:3000
+
+##Query prometheus metric
+Query PromQL dapat dilakukan di menu Explore
+
+##Grafana Dashboard
+Salah satu yang menarik di grafana adalah kita dapat membuat dashboard dari data metric yang ada.
+Contohnya menggunakan template Node Exporter Full dari https://grafana.com/grafana/dashboards
+Cara importnya cukup copy ID dashboard dan masukan ke menu Dashboard > New > Import
