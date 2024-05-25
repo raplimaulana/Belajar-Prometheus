@@ -79,7 +79,7 @@ http://localhost:3100/metrics
 docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
 docker plugin ls
 
-#untuk mengirim log container ke loki, tambahkan logging di docker compose containernya
+#agar container dapat mengirimkan log ke loki, tambahkan logging di docker compose containernya
 nano docker-compose.yaml 
 
 services:
@@ -90,3 +90,8 @@ services:
       - 8080:80
     logging:
       driver: loki 
+      options:
+        loki-url: "http://localhost:3100/loki/api/v1/push"
+        loki-retries: 5
+        loki-batch-size: 400
+ 
