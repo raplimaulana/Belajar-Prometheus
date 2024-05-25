@@ -1,0 +1,92 @@
+### Configuration ###
+##file configuration 1
+#setup local config loki 
+nano promtail-local-config.yaml
+
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://localhost:3100/loki/api/v1/push
+  #- url: http://172.17.200.99:3100/api/prom/push
+
+scrape_configs:
+- job_name: system
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      job: varlogs
+      __path__: /var/log/*log
+
+- job_name: api
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      job: apilogs
+      __path__: /home/vagrant/app/app.log
+
+- job_name: kubernetes-pods
+  pipeline_stages:
+    - cri: {}
+    - match:
+      selector: '{app="api"}'
+      stages:
+        - json:
+            expressions:
+              log:
+        - json:
+            source: log
+            expressions:
+              code: code 
+              method: method
+        - labels: 
+            code:
+            method:
+  kubernetes_sd_configs:
+  ###
+        
+
+#start Loki
+./loki-linux-amd64 -config.file=promtail-local-config.yaml
+
+#access browser
+http://localhost:3100/metrics
+
+*get password loki grafana from secret kubernetes
+ - kubectl describe secret secret loki-grafana
+	  
+	 type: Opaque
+	 Data 
+	 ====
+	 admin-password: 40 bytes
+	 admin-user: 5 bytes
+	
+ - kubectl get secret loki-grafana -o jsonpath={".data.admin-password}" | base64 --decode
+ - kubectl get secret loki-promtail -o jsonpath={".data.promtail\.yaml}" | base64 --decode > promtail.yaml
+   kubectl delete secret loki-promtail 
+   kubectl create secret generic loki-promtail --from-file=./promtail.yaml
+
+
+
+##file configuration 2
+#untuk melakukan monitoring log pada container yang berjalan, ada plugin docker yang perlu ditambahkan terlebih dahulu
+docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
+docker plugin ls
+
+#untuk mengirim log container ke loki, tambahkan logging di docker compose containernya
+nano docker-compose.yaml 
+
+services:
+  nginx:
+    image: nginx:lates
+    container_name: nginx-demo
+    ports:
+      - 8080:80
+    logging:
+      driver: loki 

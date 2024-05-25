@@ -1,0 +1,14 @@
+### Loki ###
+Loki is a log aggregation system that design to store and query logs.
+Design tobe cost effective and easy to operate.
+Loki does not index full text from logs (like elasticsearch).
+Loki only indexes enable (metadata) from logs.
+Makes it more cost effective and performant.
+
+*Loki use promtail for logging
+
+example:
+labels {job='syslog', env='production'}         #index
+
+{"level":40;"time":1419198131,"pid:22320,"hostname":"DEKSTOP01","method":"GET","route":"/produts","code":"200"}
+

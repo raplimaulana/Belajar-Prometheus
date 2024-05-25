@@ -1,0 +1,12 @@
+### Integrasi dengan Grafana ###
+#add new connection
+Home > Connections > Data sources > Add data sources > Loki
+
+HTTP
+URL: http://localhost:3100
+
+#open Loki
+Home > Explore
+
+Label filters
+job = varlogs
