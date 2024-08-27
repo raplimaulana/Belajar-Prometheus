@@ -1,6 +1,6 @@
 ### Configuration ###
 #setup local config loki
-nano Local-Configuration-Example.yaml
+nano loki-local-config.yaml
 
 auth_enabled: false
 
