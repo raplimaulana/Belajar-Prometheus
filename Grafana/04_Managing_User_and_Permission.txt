@@ -1,0 +1,25 @@
+### MANAGING USER AND PERMISSION ###
+
+##Create User 
+1. Create User 
+   Grafana > Home > Administration > User and access > Users > New user > 
+
+   Name                     : Rapli Maulana 
+   Email                    : rapli.maulana@gmail.com 
+   Username                 : raplimaulana 
+   Password                 : pass123
+   Permission 
+   Grafana Admin            : No 
+   Organizations 
+   Add user to organization : viewer
+
+2. Create Team
+   Grafana > Home > Administration > User and access > Teams > New team >
+
+   Name                     : Devops Team 
+   Role                     : no roles assigned
+
+3. Add Member to Team 
+   Grafana > Home > Administration > User and access > Teams > Your team > Members > Add member > 
+
+   Add member               : User = raplimaulana = Member 

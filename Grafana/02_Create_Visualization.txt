@@ -1,0 +1,121 @@
+### CREATE VISUALIZATION ###
+
+##Create Visualization
+Grafana > Home > Dashboard > New > New dashboard > Add visualization > Select data source > Your data source > 
+
+##Create Gauge
+1. Create Query 
+   ... > Your data source > Query > 
+
+   A : Metrics browser = sum(kubelet_node_name{job="integrations/kubernetes/kubelet"})
+
+2. Create Visualization
+   ... > Your data source > Visualization > Gauge >
+
+   Panel options 
+   Title        : # of running k8s nodes 
+   Value options 
+   Show         : Calculate
+   Calculation  : Last *
+   Fields       : Numeric Fields
+   Standard options 
+   Unit         : Choose 
+   Min          : 0 
+   Max          : 4 
+   Decimals     : auto 
+   Display name : none 
+   Color scheme : From thresholds (by value)
+   No value     : -
+   Thresholds 
+   Red          : 80 
+   Green        : Base
+
+##Create Time Series
+1. Create Query 
+   ... > Your data source > Query > 
+
+   A : Metrics browser = rate(process_cpu_seconds_total{job="integrations/kubernetes/kubelet"}[$__rate_interval])
+
+2. Create Visualization
+   ... > Your data source > Visualization > Time series >
+
+   Panel options 
+   Title               : amount of CPU activity per k8s node 
+   Tooltip 
+   Tooltip mode        : Single 
+   Hover proximity     : 
+   Max width           :
+   Max height          :
+   Legend 
+   Visibility          : True 
+   Mode                : List 
+   Placement           : Bottom 
+   Values              : Choose 
+   Axis 
+   Time zone           : Default 
+   Placement           : Auto 
+   Label               : 
+   Width               : Auto 
+   Show grid lines     : Auto 
+   Color               : Text 
+   Show border         : False 
+   Scale               : Linear
+   Centered zero       : False 
+   Soft min            : 
+   Soft max            : 
+   Graph styles 
+   Style               : Lines
+   Line interpolation  : choose no.1 
+   Line width          : 1 
+   Fill opacity        : 0 
+   Gradient mode       : None 
+   Line style          : Solid 
+   Connect null values : Never 
+   Disconnect values   : Never 
+   Show points         : Auto 
+   Point size          : 5 
+   Stack series        : Off
+
+##Create Stats
+1. Create Query 
+   ... > Your data source > Query > 
+
+   A : Metrics browser = sum(kubelet_running_containers{job="integrations/kubernetes/kubelet"})
+
+2. Create Visualization
+   ... > Your data source > Visualization > Stat >
+
+   Panel options 
+   Title        : running k8s pods 
+   Value options 
+   Show         : Calculate
+   Calculation  : Last *
+   Fields       : Numeric Fields
+   Standard options 
+   Unit         : Choose 
+   Min          : 0 
+   Max          : 4 
+   Decimals     : auto 
+   Display name : none 
+   Color scheme : Single color
+   No value     : -
+
+##Create Logs
+1. Create Query 
+   ... > Your data source > Query > 
+
+   A : {cluster="microbs", k8s_app="ecommerce"} |~ "critical|Critical|CRITICAL|error|Error|ERROR|fail|Fail|FAIL"
+
+2. Create Visualization
+   ... > Your data source > Visualization > Logs >
+
+   Panel options 
+   Title              : Logs pod kubernetes
+   Logs         
+   Time               : False 
+   Unique labels      : False 
+   Common labels      : False 
+   Wrap lines         : False 
+   Prettify JSON      : False 
+   Enable log details : True 
+   Deduplication      : None 

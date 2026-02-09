@@ -1,0 +1,49 @@
+### ALERT EMAIL ###
+
+##Create Alert Email 
+1. Create Rule 
+   Grafana > Home > Alerts & IRM > Alert rules > Manage alert rules > New alert rule > 
+
+   Enter alert rule name
+   Name                     : High service latency 
+
+   Define query and alert condition 
+   A                        : Select your data source 
+   Options                  : 10 minutes 
+   Metric browser           : histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{}[$__rate_interval])) by(le, service_name)) * 1
+
+   Expressions    
+   B                        : Reduce 
+   Input                    : A 
+   Function                 : Last 
+   Mode                     : Strict 
+   C                        : Threshold 
+   Input                    : A 
+   Is above                 : 2000
+
+   Set evaluation behaviour 
+   Folder                   : New folder > Folder name = Microbs Alerts 
+   Evaluation Group         : New evaluation group > Evaluation group name = RED alert, Evaluation interval = 5m
+   Pending period           : 5m 
+
+   Configure labels and notifications 
+   Labels                   : App = Ecommerce, Severity = Critical 
+
+   Add annotations 
+   Summary                  : High Latency - {{ $labels.service_name}}
+   Add custom annotation    : SLO  = 2.0s 
+   Ling dashboard and panel : Select your dashboard 
+
+2. Create Contact Points
+   Grafana > Home > Alerts & IRM > Alerting > Contact points > Add contact point > 
+
+   Name                     : SRE on call 
+   Integration              : Email 
+   Addresses                : rapli.maulana@gmail.com
+
+3. Create Notification Policies 
+   Grafana > Home > Alerts & IRM > Alerting > Notification policies > New nested policy > 
+
+   Matching labels          : App = Ecommerce, Severity = Critical 
+   Contact point            : SRE on call 
+   
